@@ -1,0 +1,453 @@
+#!/bin/bash
+##=========================================================##
+ # SPDX-License-Identifier: GPL-3.0-or-later               #
+ # Copyright (c) 2025 Jimmy Källhagen                      #
+ # Part of Yggdrasil - Nordix desktop environment          #
+ # Nordix and Yggdrasil are trademarks of Jimmy Källhagen  #
+##=========================================================##
+
+# Nordix - Performance Launcher
+#
+# Launches programs with HugePages and CPU performance mode
+# Perfect for emulators, virtual machines, and performance-critical apps
+# All settings are restored automatically when the program exits
+
+RED='\033[38;2;255;0;0m'
+GREEN='\033[38;2;0;255;0m'
+WHITE='\033[38;2;255;255;255m'
+BLUE='\033[38;2;1;204;255m'
+NBLUE='\033[38;2;19;171;198m'
+NVBLUE='\033[38;2;175;251;253m'
+NICE='\033[38;2;0;132;175m'
+NARTIC='\033[38;2;156;230;255m'
+NGLACIER='\033[38;2;80;200;255m'
+NVFROST='\033[38;2;210;255;255m'
+NHYPRBLUE='\033[38;2;0;210;255m'
+NC='\033[0m'
+
+PROGRAM="$*"
+
+# Store original state
+ORIG_GOVERNOR=""
+ORIG_EPP=""
+ORIG_HUGEPAGES=""
+TERMINAL_PID=$PPID
+
+# Draw a decorative box around text
+draw_box() {
+    local text="$1"
+    local length=${#text}
+    local border=$(printf '%*s' $((length+4)) | tr ' ' '=')
+    echo -e "${BLUE}${border}${NC}"
+    echo -e "${BLUE}|${NC} ${NARTIC}$text${NC} ${BLUE}|${NC}"
+    echo -e "${BLUE}${border}${NC}"
+}
+
+# Draw Nordix border line
+draw_border() {
+    echo -e "${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NC}"
+}
+
+draw_logo() {
+    echo -e "${NGLACIER}    ____  ___ ______ _______ _______ ____________    ____   ${NC}"
+    echo -e "${NGLACIER}    |  \ |  |/  __  \|  __  \|   __ \ \_    _/\  \  /  /    ${NC}"
+    echo -e "${NGLACIER}    |   \|  |  |  |  | |__)  |  |  | |  |  |   \  \/  /     ${NC}"
+    echo -e "${NGLACIER}    |  |\   |  |__|  |  __  <|  |__| | _|  |_  /  /\  \     ${NC}"
+    echo -e "${NGLACIER}  --|__| \__|\______/|__| \__|______/ /______\/__/  \__\-- ${NC}"
+    echo -e "${NVBLUE}.__________________________________________________________.${NC}"
+    echo -e "${NARTIC}...........................     ............................${NC}"
+    echo -e "${NARTIC}.................                     ...................${NC}"
+    echo -e "${NARTIC}..........                                ............${NC}"
+    echo -e "${NARTIC}......                                     ......${NC}"
+    echo -e "${NARTIC}...                                       ...${NC}"
+    echo -e "${NARTIC}.                                       .${NC}"
+}
+
+show_help() {
+    draw_logo
+    echo ""
+    echo ""
+    echo ""
+    draw_box "        Nordix - Performance Launcher         "
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    draw_border
+    echo -e "${WHITE}DESCRIPTION:${NC}"
+    draw_border
+    echo ""
+    echo -e "${NARTIC} Launches programs with HugePages ${NC}"
+    echo -e "${NARTIC} and CPU performance mode enabled.${NC}"
+    echo -e "${NARTIC} Perfect for emulators, virtual machines,${NC}"
+    echo -e "${NARTIC} and performance-critical apps.${NC}"
+    echo -e "${NARTIC} All settings are restored ${NC}"
+    echo -e "${NARTIC} automatically when the program exits.${NC}"
+    echo ""
+    draw_border
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    draw_border
+    echo -e "${WHITE}USAGE:${NC}"
+    draw_border
+    echo ""
+    echo -e "${NARTIC}  nordix-cli-hugepages <program>${NC}"
+    echo ""
+    echo -e "${NARTIC}  Example 1:${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} nordix-cli-hugepages virt-manager${NC}"
+    echo ""
+    echo -e "${NARTIC}  Example 2:${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} nordix-cli-hugepages ~/Games/yuzu.AppImage${NC}"
+    echo ""
+    echo -e "${NARTIC}  Example 3:${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} nordix-cli-hugepages qemu-system-x86_64 -m 8G disk.img${NC}"
+    echo ""
+    echo -e "${NARTIC}  Example 4: ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} nordix-cli-hugepages gnome-boxes${NC}"
+    echo ""
+    draw_border
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    draw_border
+    echo -e "${WHITE}HUGEPAGE OPTIONS:${NC}"
+    draw_border
+    echo ""
+    echo -e "${BLUE} 1${NC} ${NVFROST}-${NC} ${NARTIC}   512 pages =  1GB RAM${NC}"
+    echo -e "${BLUE} 2${NC} ${NVFROST}-${NC} ${NARTIC}  1024 pages =  2GB RAM${NC}"
+    echo -e "${BLUE} 3${NC} ${NVFROST}-${NC} ${NARTIC}  2048 pages =  4GB RAM${NC}"
+    echo -e "${BLUE} 4${NC} ${NVFROST}-${NC} ${NARTIC}  4096 pages =  8GB RAM${NC}"
+    echo -e "${BLUE} 5${NC} ${NVFROST}-${NC} ${NARTIC}  6144 pages = 12GB RAM${NC}"
+    echo -e "${BLUE} 6${NC} ${NVFROST}-${NC} ${NARTIC}  8192 pages = 16GB RAM${NC}"
+    echo -e "${BLUE} 7${NC} ${NVFROST}-${NC} ${NARTIC} 10240 pages = 20GB RAM${NC}"
+    echo -e "${BLUE} 8${NC} ${NVFROST}-${NC} ${NARTIC} 12288 pages = 24GB RAM${NC}"
+    echo -e "${BLUE} 9${NC} ${NVFROST}-${NC} ${NARTIC} 16384 pages = 32GB RAM${NC}"
+    echo ""
+    draw_border
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    draw_border
+    echo -e "${WHITE}WHAT IT DOES:${NC}"
+    draw_border
+    echo ""
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} Allocates HugePages (2MB pages for better memory performance)${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} Sets CPU governor to 'performance' ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} Sets energy performance preference to 'performance' ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} Disables USB power saving ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} Hides terminal while program runs (swallow) ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} Detects VM managers (virt-manager, gnome-boxes) ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} Waits for all QEMU/VMs to close before restoring settings ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} Restores all settings when program exits ${NC}"
+    echo ""
+    draw_border
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    draw_border
+    echo -e "${WHITE}REQUIREMENTS:${NC}"
+    draw_border
+    echo ""
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} sudo privileges ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} cpupower package installed ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} Hyprland (for terminal swallow feature) ${NC}"
+    echo ""
+    draw_border
+    echo ""
+    exit 0
+}
+
+# Check for --help or -h
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    show_help
+fi
+
+# Check if program was provided
+if [ -z "$PROGRAM" ]; then
+    draw_logo
+    echo ""
+    echo ""
+    draw_border
+    echo ""
+    echo -e "${NARTIC}  nordix-cli-hugepages <program>${NC}"
+    echo ""
+    echo -e "${NARTIC}  Example 1:${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} nordix-cli-hugepages virt-manager${NC}"
+    echo ""
+    echo -e "${NARTIC}  Example 2:${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} nordix-cli-hugepages ~/Games/yuzu.AppImage${NC}"
+    echo ""
+    echo -e "${NARTIC}  Example 3:${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} nordix-cli-hugepages qemu-system-x86_64 -m 8G disk.img${NC}"
+    echo ""
+    echo -e "${NARTIC}  Example 4: ${NC}"
+    echo -e "${NHYPRBLUE}❯${NC}${NARTIC} nordix-cli-hugepages gnome-boxes${NC}"
+    echo ""
+    echo -e "${NARTIC}For help ${NHYPRBLUE}❯ nordix-cli-hugepages --help${NC}"
+    echo ""
+    draw_border
+    exit 1
+fi
+
+show_menu() {
+    clear
+    echo ""
+    draw_logo
+    echo ""
+    echo ""  
+    draw_box "        Nordix - Performance Launcher         "
+    echo ""
+    echo ""
+    draw_border
+    echo -e "${WHITE}Usually you need to permanently lock memory to reserve them for hugepages${NC}"
+    echo -e "${WHITE}Nordix has made the 'Nordix - Performance Launcher' to solve this problem${NC}"
+    echo -e "${WHITE}Every workload that benefits from hugepages can be launched with these options${NC}"
+    echo -e "${WHITE}Emulators, Virtual machines and more${NC}"
+    echo ""
+    echo -e "${WHITE}Pick the program of your choice and set hugepages below${NC}"
+    echo -e "${WHITE}System will be set to performance mode${NC}"
+    echo -e "${WHITE}Everything will be restored back to normal after you are finished${NC}"
+    draw_border
+    echo ""
+    echo -e "${BLUE} 1${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=512   ${NHYPRBLUE}(1GB RAM)${NC}"
+    echo -e "${BLUE} 2${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=1024  ${NHYPRBLUE}(2GB RAM)${NC}"
+    echo -e "${BLUE} 3${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=2048  ${NHYPRBLUE}(4GB RAM)${NC}"
+    echo -e "${BLUE} 4${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=4096  ${NHYPRBLUE}(8GB RAM)${NC}"
+    echo -e "${BLUE} 5${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=6144  ${NHYPRBLUE}(12GB RAM)${NC}"
+    echo -e "${BLUE} 6${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=8192  ${NHYPRBLUE}(16GB RAM)${NC}"
+    echo -e "${BLUE} 7${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=10240 ${NHYPRBLUE}(20GB RAM)${NC}"
+    echo -e "${BLUE} 8${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=12288 ${NHYPRBLUE}(24GB RAM)${NC}"
+    echo -e "${BLUE} 9${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=16384 ${NHYPRBLUE}(32GB RAM)${NC}"
+    echo ""
+    echo -e "${BLUE} 0${NC} ${NVFROST}-${NC} ${NARTIC}Exit${NC}"
+    draw_border
+    echo ""
+    echo -e "${NGLACIER}Choose option ${NHYPRBLUE}(0-9):${NC}"
+    echo ""
+}
+
+save_state() {
+    # Save current CPU governor
+    ORIG_GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo "schedutil")
+    
+    # Save current energy performance preference
+    ORIG_EPP=$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null || echo "balance_performance")
+    
+    # Save current hugepages
+    ORIG_HUGEPAGES=$(cat /proc/sys/vm/nr_hugepages 2>/dev/null || echo "0")
+}
+
+restore_state() {
+    echo ""
+    draw_border
+    echo -e "${WHITE}Restoring system state...${NC}"
+    draw_border
+    echo ""
+    
+    # Restore hugepages
+    sudo sysctl -w vm.nr_hugepages="$ORIG_HUGEPAGES" > /dev/null 2>&1
+    echo -e "${NARTIC}HugePages restored to: ${NHYPRBLUE}${ORIG_HUGEPAGES}${NC}"
+    
+    # Restore CPU governor
+    sudo cpupower frequency-set -g "$ORIG_GOVERNOR" > /dev/null 2>&1
+    echo -e "${NARTIC}CPU governor restored to: ${NHYPRBLUE}${ORIG_GOVERNOR}${NC}"
+    
+    # Restore energy performance preference
+    if [ -f /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference ]; then
+        echo "$ORIG_EPP" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference > /dev/null 2>&1
+        echo -e "${NARTIC}Energy preference restored to: ${NHYPRBLUE}${ORIG_EPP}${NC}"
+    fi
+    
+    echo ""
+    draw_border
+    echo -e "${GREEN}System restored successfully${NC}"
+    draw_border
+    echo ""
+    echo -e "${NVFROST}Hope you enjoyed Nordix Performance Launcher!${NC}"
+    echo ""
+    sleep 2
+}
+
+launch_program() {
+    # Save current state before making changes
+    save_state
+    
+    # Set up trap to restore state on exit/interrupt
+    trap restore_state EXIT
+    
+    echo ""
+    draw_border
+    echo -e "${WHITE}Applying performance settings...${NC}"
+    draw_border
+    echo ""
+    
+    # Set hugepages
+    sudo sysctl -w vm.nr_hugepages=${HUGEPAGES} > /dev/null 2>&1
+    echo -e "${NARTIC}HugePages set to: ${NHYPRBLUE}${HUGEPAGES} (${RAM})${NC}"
+    
+    # Set CPU governor to performance
+    sudo cpupower frequency-set -g performance > /dev/null 2>&1
+    echo -e "${NARTIC}CPU governor set to: ${NHYPRBLUE}performance${NC}"
+    
+    # Set energy performance preference to performance
+    if [ -f /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference ]; then
+        echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference > /dev/null 2>&1
+        echo -e "${NARTIC}Energy preference set to: ${NHYPRBLUE}performance${NC}"
+    fi
+    
+    # Disable USB power saving
+    for usb in /sys/bus/usb/devices/*/power/control; do
+        if [ -f "$usb" ]; then
+            echo "on" | sudo tee "$usb" > /dev/null 2>&1
+        fi
+    done
+    echo -e "${NARTIC}USB power saving: ${NHYPRBLUE}disabled${NC}"
+    
+    echo ""
+    draw_border
+    echo -e "${GREEN}Launching: ${PROGRAM}${NC}"
+    draw_border
+    echo ""
+    
+    sleep 1
+    
+    # Hide terminal (swallow) using Hyprland
+    hyprctl dispatch movetoworkspacesilent special:hidden,pid:$TERMINAL_PID 2>/dev/null
+    
+    # Check if this is a VM manager that spawns QEMU processes
+    IS_VM_MANAGER=false
+    case "$PROGRAM" in
+        *virt-manager*|*gnome-boxes*|*virtmanager*)
+            IS_VM_MANAGER=true
+            echo -e "${NARTIC}VM Manager detected - will wait for all VMs to close${NC}"
+            ;;
+    esac
+    
+    # Run the program (NOT exec, so script continues after)
+    $PROGRAM &
+    PROGRAM_PID=$!
+    
+    if [ "$IS_VM_MANAGER" = true ]; then
+        # Wait for virt-manager to start
+        sleep 2
+        
+        # Wait for virt-manager AND all QEMU processes to finish
+        while true; do
+            # Check if virt-manager is still running
+            VM_MANAGER_RUNNING=false
+            if kill -0 $PROGRAM_PID 2>/dev/null; then
+                VM_MANAGER_RUNNING=true
+            fi
+            
+            # Check if any QEMU processes are running
+            QEMU_RUNNING=false
+            if pgrep -x "qemu-system-x86_64" > /dev/null 2>&1 || \
+               pgrep -x "qemu-system-x86" > /dev/null 2>&1 || \
+               pgrep -x "qemu-kvm" > /dev/null 2>&1 || \
+               pgrep -f "qemu-system" > /dev/null 2>&1; then
+                QEMU_RUNNING=true
+            fi
+            
+            # Exit loop only when both virt-manager AND all VMs are closed
+            if [ "$VM_MANAGER_RUNNING" = false ] && [ "$QEMU_RUNNING" = false ]; then
+                break
+            fi
+            
+            sleep 2
+        done
+    else
+        # For non-VM-manager programs, just wait normally
+        wait $PROGRAM_PID
+    fi
+    
+    # Bring terminal back
+    hyprctl dispatch movetoworkspace e+0,pid:$TERMINAL_PID 2>/dev/null
+    
+    # restore_state will be called automatically via trap EXIT
+}
+
+# ============================================
+# MAIN LOOP
+# ============================================
+while true; do
+    show_menu
+    echo ""
+    echo -e "${WHITE}Enter your choice (0-9):${NC}"
+    echo -ne "${NHYPRBLUE}❯ ${NC}"
+    read choice
+    
+    case $choice in
+        1) 
+            HUGEPAGES=512
+            RAM="1GB"
+            launch_program
+            exit 0
+            ;;
+        2) 
+            HUGEPAGES=1024 
+            RAM="2GB" 
+            launch_program
+            exit 0
+            ;;
+        3)
+            HUGEPAGES=2048        
+            RAM="4GB"
+            launch_program
+            exit 0
+            ;;
+        4)
+            HUGEPAGES=4096 
+            RAM="8GB"
+            launch_program
+            exit 0
+            ;;
+        5)
+            HUGEPAGES=6144 
+            RAM="12GB"
+            launch_program
+            exit 0
+            ;;
+        6)
+            HUGEPAGES=8192 
+            RAM="16GB"
+            launch_program
+            exit 0
+            ;;
+        7)
+            HUGEPAGES=10240 
+            RAM="20GB"
+            launch_program
+            exit 0
+            ;;
+        8)  
+            HUGEPAGES=12288 
+            RAM="24GB"
+            launch_program
+            exit 0
+            ;;
+        9)
+            HUGEPAGES=16384 
+            RAM="32GB"
+            launch_program
+            exit 0
+            ;;
+        0)
+            clear
+            echo ""
+            draw_border
+            echo -e "${GREEN}Goodbye and hope you enjoyed Nordix - Performance Launcher!${NC}"
+            draw_border
+            echo ""
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Invalid choice! Please enter a number between 0 and 9.${NC}"
+            sleep 2
+            ;;
+    esac
+done
