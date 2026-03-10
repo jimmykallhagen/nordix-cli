@@ -229,7 +229,7 @@ Contributions are welcome! When creating new CLI tools:
 4. Add a startup check for dependencies
 5. Include an "About" or "Help" option
 
-## Nordix Principles
+## Nordix Goal
 
 > *"Give the Linux Power User experience to everyone"*
 
