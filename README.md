@@ -195,6 +195,16 @@ Performance optimization for applications that benefit from HugePages.
 - Enable/disable HugePages
 - Monitor usage
 
+---
+## How to install
+```bash
+mkdir ~/builds
+cd ~/builds
+git clone https://github.com/jimmykallhagen/nordix-cli.git
+sudo cp -r ~/builds/nordix-cli/usr /
+sudo chmod +x /usr/lib/nordix/nordix-cli/*
+echo 'export PATH="/usr/lib/nordix/nordix-cli:$PATH"' >> ~/.profile
+```
 
 ## Contributing
 
