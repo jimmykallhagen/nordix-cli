@@ -1,0 +1,321 @@
+#!/bin/bash
+##============================================================================##
+ # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0                      #
+ # Nordix license - https://polyformproject.org/licenses/noncommercial/1.0.0  #
+ # Copyright (c) 2025 Jimmy Källhagen                                         #
+ # Part of Nordix - https://github.com/jimmykallhagen/Nordix                  #
+ # Nordix and Yggdrasil are trademarks of Jimmy Källhagen                     #
+##============================================================================##
+
+# Nordix - Performance Launcher
+# Version 1.0 - Nordix Edition
+# Nordix Philosophy: High-performance, no extra blout, just pure power-users tools
+
+RED='\033[38;2;255;0;0m'
+GREEN='\033[38;2;0;255;0m'
+WHITE='\033[38;2;255;255;255m'
+BLUE='\033[38;2;1;204;255m'
+NBLUE='\033[38;2;19;171;198m'
+NVBLUE='\033[38;2;175;251;253m'
+NICE='\033[38;2;0;132;175m'
+NARTIC='\033[38;2;156;230;255m'
+NGLACIER='\033[38;2;80;200;255m'
+NVFROST='\033[38;2;210;255;255m'
+NHYPRBLUE='\033[38;2;0;210;255m'
+NC='\033[0m'
+
+PROGRAM="$*"
+
+# Draw a decorative box around text
+draw_box() {
+    local text="$1"
+    local length=${#text}
+    local border=$(printf '%*s' $((length+4)) | tr ' ' '=')
+    echo -e "${BLUE}${border}${NC}"
+    echo -e "${BLUE}|${NC} ${NARTIC}$text${NC} ${BLUE}|${NC}"
+    echo -e "${BLUE}${border}${NC}"
+}
+# Draw Nordix border line
+draw_border() {
+    echo -e "${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NGLACIER}=${NVBLUE}=${NC}"
+}
+
+
+show_help() {
+    echo -e "${NGLACIER}    ____  ___ ______ _______ _______ ____________    ____   ${NC}"
+    echo -e "${NGLACIER}    |  \ |  |/  __  \|  __  \|   __ \ \_    _/\  \  /  /    ${NC}"
+    echo -e "${NGLACIER}    |   \|  |  |  |  | |__)  |  |  | |  |  |   \  \/  /     ${NC}"
+    echo -e "${NGLACIER}    |  |\   |  |__|  |  __  <|  |__| | _|  |_  /  /\  \     ${NC}"
+    echo -e "${NGLACIER}  --|__| \__|\______/|__| \__|______/ /______\/__/  \__\-- ${NC}"
+    echo -e "${NVBLUE}.__________________________________________________________.${NC}"
+    echo -e "${NARTIC}...........................     ............................${NC}"
+    echo -e "${NARTIC}.................                     ...................${NC}"
+    echo -e "${NARTIC}..........                                ............${NC}"
+    echo -e "${NARTIC}......                                     ......${NC}"
+    echo -e "${NARTIC}...                                       ...${NC}"
+    echo -e "${NARTIC}.                                       .${NC}"
+    echo ""
+    echo ""
+    echo ""
+    draw_box "        Nordix - Performance Launcher         "
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    draw_border
+    echo -e "${WHITE}DESCRIPTION:${NC}"
+    draw_border
+    echo ""
+    echo -e "${NARTIC} Launches programs with HugePages and CPU performance mode enabled.${NC}"
+    echo -e "${NARTIC}Perfect for emulators, virtual machines, and performance-critical apps.${NC}"
+    echo -e "${NARTIC}All settings are restored automatically when the program exits.${NC}"
+    echo ""
+    draw_border
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    draw_border
+    echo -e "${WHITE}USAGE:${NC}"
+    draw_border
+    echo ""
+    echo -e "${NARTIC}nordix-performance-launcher <program>${NC}"
+    echo -e "${NARTIC}Example1: nordix-performance-launcher virt-manager${NC}"
+    echo -e "${NARTIC}Example2: nordix-performance-launcher ~/Games/yuzu.AppImage${NC}"
+    echo -e "${NARTIC}Example2: nordix-performance-launcher qemu-system-x86_64 -m 8G disk.im${NC}"
+    echo ""
+    echo -e "${NARTIC}Maby: nordix-performance-launcher ~/Games/Mupen64Plus.AppImage??${NC}"
+    echo ""
+    draw_border
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    draw_border
+    echo -e "${WHITE}EXAMPLES:${NC}"
+    draw_border
+    echo ""
+    echo -e "${WHITE}HUGEPAGE OPTIONS:${NC}"
+    echo -e "    1) 512   pages = 1GB RAM"
+    echo -e "    2) 1024  pages = 2GB RAM"
+    echo -e "    3) 2048  pages = 4GB RAM"
+    echo -e "    4) 4096  pages = 8GB RAM"
+    echo -e "    5) 6144  pages = 12GB RAM"
+    echo -e "    6) 8192  pages = 16GB RAM"
+    echo -e "    7) 10240 pages = 20GB RAM"
+    echo -e "    8) 12288 pages = 24GB RAM"
+    echo -e "    9) 16384 pages = 32GB RAM"
+    echo ""
+    draw_border
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo -e "${WHITE}WHAT IT DOES:${NC}"
+    echo -e "    • Allocates HugePages (2MB pages for better memory performance)"
+    echo -e "    • Sets CPU governor to 'performance'"
+    echo -e "    • Sets AMD pstate to 'passive' mode"
+    echo -e "    • Disables USB power saving"
+    echo ""
+    draw_border
+    echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo -e "${WHITE}REQUIREMENTS:${NC}"
+    echo -e "    • sudo privileges"
+    echo -e "    • cpupower package installed"
+    echo ""
+    draw_border
+    echo ""
+    exit 0
+}
+
+# Check for --help or -h
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    show_help
+fi
+# Check if program was provided
+if [ -z "$PROGRAM" ]; then
+    echo -e "${NGLACIER}    ____  ___ ______ _______ _______ ____________    ____   ${NC}"
+    echo -e "${NGLACIER}    |  \ |  |/  __  \|  __  \|   __ \ \_    _/\  \  /  /    ${NC}"
+    echo -e "${NGLACIER}    |   \|  |  |  |  | |__)  |  |  | |  |  |   \  \/  /     ${NC}"
+    echo -e "${NGLACIER}    |  |\   |  |__|  |  __  <|  |__| | _|  |_  /  /\  \     ${NC}"
+    echo -e "${NGLACIER}  --|__| \__|\______/|__| \__|______/ /______\/__/  \__\-- ${NC}"
+    echo -e "${NVBLUE}.__________________________________________________________.${NC}"
+    echo -e "${NARTIC}...........................     ............................${NC}"
+    echo -e "${NARTIC}.................                     ...................${NC}"
+    echo -e "${NARTIC}..........                                ............${NC}"
+    echo -e "${NARTIC}......                                     ......${NC}"
+    echo -e "${NARTIC}...                                       ...${NC}"
+    echo -e "${NARTIC}.                                       .${NC}"
+    echo ""
+    echo ""
+    draw_border
+    echo ""
+    echo -e "${NARTIC}Usage: nordix-performance-launcher <program>${NC}"
+    echo -e "${NARTIC}Example1: nordix-performance-launcher virt-manager${NC}"
+    echo -e "${NARTIC}Example2: nordix-performance-launcher ~/Games/yuzu.AppImage${NC}"
+    echo -e "${NARTIC}For help: nordix-performance-launcher --help${NC}"
+    echo ""
+    draw_border
+
+    
+    
+    exit 1
+fi
+show_menu() {
+    clear
+    echo ""
+    echo -e "${NGLACIER}    ____  ___ ______ _______ _______ ____________    ____   ${NC}"
+    echo -e "${NGLACIER}    |  \ |  |/  __  \|  __  \|   __ \ \_    _/\  \  /  /    ${NC}"
+    echo -e "${NGLACIER}    |   \|  |  |  |  | |__)  |  |  | |  |  |   \  \/  /     ${NC}"
+    echo -e "${NGLACIER}    |  |\   |  |__|  |  __  <|  |__| | _|  |_  /  /\  \     ${NC}"
+    echo -e "${NGLACIER}  --|__| \__|\______/|__| \__|______/ /______\/__/  \__\-- ${NC}"
+    echo -e "${NVBLUE}.__________________________________________________________.${NC}"
+    echo -e "${NARTIC}...........................     ............................${NC}"
+    echo -e "${NARTIC}.................                     ...................${NC}"
+    echo -e "${NARTIC}..........                                ............${NC}"
+    echo -e "${NARTIC}......                                     ......${NC}"
+    echo -e "${NARTIC}...                                       ...${NC}"
+    echo -e "${NARTIC}.                                       .${NC}"
+    echo ""
+    echo ""  
+    draw_box "        Nordix - Performance Launcher         "
+    echo ""
+    echo ""
+
+    draw_border
+    echo -e "${WHITE}Usally you need to permanent lock memory to reservate them for hugepages${NC}"
+    echo -e "${WHITE}Nordix has made the 'Nordix - Performance Launcher' to solve this problems${NC}"
+    echo -e "${WHITE}Every workloads that's benefits from hugepages can be launched with theese options${NC}"
+    echo -e "${WHITE}Emulators, Virtuals-maschines and more${NC}"
+    echo ""
+    echo -e "${WHITE}Pick the program of your choise and set hugepage down here${NC}"
+    echo -e "${WHITE}System will be set to performance${NC}"
+    echo -e "${WHITE}Everything will be restore back to normal after you are finished${NC}"
+    draw_border
+    echo ""
+    echo -e "${BLUE} 1${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=512   ${NHYPRBLUE}(1GB-RAM)${NC}"
+    echo -e "${BLUE} 2${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=1024  ${NHYPRBLUE}(2GB-RAM)${NC}"
+    echo -e "${BLUE} 3${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=2048  ${NHYPRBLUE}(4GB-RAM)${NC}"
+    echo -e "${BLUE} 4${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=4096  ${NHYPRBLUE}(8GB-RAM)${NC}"
+    echo -e "${BLUE} 5${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=6144  ${NHYPRBLUE}(12GB-RAM)${NC}"
+    echo -e "${BLUE} 6${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=8192  ${NHYPRBLUE}(16GB-RAM)${NC}"
+    echo -e "${BLUE} 7${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=10240 ${NHYPRBLUE}(20GB-RAM)${NC}"
+    echo -e "${BLUE} 8${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=12288 ${NHYPRBLUE}(24GB-RAM)${NC}"
+    echo -e "${BLUE} 9${NC} ${NVFROST}-${NC} ${NARTIC}HUGEPAGES=16384 ${NHYPRBLUE}(32GB-RAM)${NC}"
+    echo ""
+    echo -e "${BLUE}0${NC} ${NVFROST}-${NC} ${NARTIC}Exit${NC}"
+    draw_border
+    echo ""
+    echo -e "${NGLACIER}Choose option ${NHYPRBLUE}(0-9):${NC}"
+    echo ""
+}
+
+
+
+
+
+
+launch_program() {
+    # save aktive state
+    ORIG_GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)
+    ORIG_EPP=$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null || echo "none")
+    
+    # Cleanup function
+    cleanup() {
+        echo -e "${WHITE}Restoring system...${NC}"
+        sudo sysctl -w vm.nr_hugepages=0 > /dev/null
+        sudo cpupower frequency-set -g "$ORIG_GOVERNOR" > /dev/null
+        if [ "$ORIG_EPP" != "none" ]; then
+            echo "$ORIG_EPP" | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference > /dev/null
+        fi
+        echo -e "${GREEN}System restored${NC}"
+    }
+    
+    # Trap for cleanup on exit/interrupt
+    trap cleanup EXIT
+    
+    # performance mode
+    sudo sysctl -w vm.nr_hugepages=${HUGEPAGES}
+    sudo cpupower frequency-set -g performance
+    echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference > /dev/null
+    
+    # Kör programmet (UTAN exec)
+    $PROGRAM
+    
+
+}
+# ============================================
+# MAIN LOOP
+# ============================================
+while true; do
+    show_menu
+    echo ""
+    echo -e "${WHITE}Enter your choice (0-9):${NC}"
+    echo -ne "${NHYPRBLUE}❯ ${NC}"
+    read choice
+    
+
+    case $choice in
+        1) 
+        HUGEPAGES=512
+        RAM=1GB
+        launch_program
+        ;;
+        2) 
+        HUGEPAGES=1024 
+        RAM=2GB 
+        launch_program
+        ;;
+        3)
+        HUGEPAGES=2048        
+        RAM=4GB
+        launch_program
+        ;;
+        4)
+        HUGEPAGES=4096 
+        RAM=8GB
+        launch_program
+        ;;
+        5)
+        HUGEPAGES=6144 
+        RAM=12GB
+        launch_program
+        ;;
+        6)
+       HUGEPAGES=8192 
+       RAM=16GB
+        launch_program
+        ;;
+        7)
+        HUGEPAGES=10240 
+        RAM=20GB
+        launch_program
+            ;;
+        8)  
+        HUGEPAGES=12288 
+        RAM=24GB
+        launch_program
+            ;;
+        9)
+        HUGEPAGES=16384 
+        RAM=32GB
+        launch_program
+            ;;
+        0)
+            clear
+            echo ""
+            draw_border
+            echo -e "${GREEN}Goodbye and hope you enjoyed  Nordix - Performance Launcher!${NC}"
+            draw_border
+            echo ""
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Invalid choice! Please enter a number between 0 and 9.${NC}"
+            sleep 2
+            ;;
+    esac
+done
