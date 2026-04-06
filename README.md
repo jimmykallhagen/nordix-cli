@@ -196,6 +196,7 @@ Performance optimization for applications that benefit from HugePages.
 - Monitor usage
 
 ---
+
 ## How to install
 ```bash
 mkdir ~/builds
@@ -205,6 +206,7 @@ sudo cp -r ~/builds/nordix-cli/usr /
 sudo chmod +x /usr/lib/nordix/nordix-cli/*
 echo 'export PATH="/usr/lib/nordix/nordix-cli:$PATH"' >> ~/.profile
 ```
+---
 
 ## Contributing
 
