@@ -1,4 +1,4 @@
-# Nordix CLI Tools
+# ![nordix-tools-icon](https://github.com/jimmykallhagen/Nordix/blob/main/icons/hicolor/128x128/apps/nordix-term.png) **Nordix CLI Tools**
 
 **Part of:** [Nordix](https://github.com/jimmykallhagen/Nordix)  
 **License:** PolyForm-Noncommercial-1.0.0  
