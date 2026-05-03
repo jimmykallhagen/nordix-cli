@@ -14,7 +14,6 @@
 # ============================================
 # Nordix CLI Snapshot
 # ZFS Snapshot Management for Nordix
-# "Nordix follows the law of performance"
 # ============================================
 
 # ============================================
