@@ -12,8 +12,6 @@
 ##============================================================================##
 
 # Nordix - Performance Launcher
-# Version 1.0 - Nordix Edition
-# Nordix Philosophy: High-performance, no extra blout, just pure power-users tools
 
 RED='\033[38;2;255;0;0m'
 GREEN='\033[38;2;0;255;0m'
