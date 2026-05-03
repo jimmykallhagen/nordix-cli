@@ -1,9 +1,8 @@
 # ![nordix-tools-icon](https://github.com/jimmykallhagen/Nordix/blob/main/icons/hicolor/128x128/apps/nordix-term.png) **Nordix CLI Tools**
 
 **Part of:** [Nordix](https://github.com/jimmykallhagen/Nordix)  
-**License:** PolyForm-Noncommercial-1.0.0  
-**Copyright (c)** 2025 Jimmy Källhagen   
-**Author:** Jimmy Källhagen
+**Author:** Jimmy Källhagen  
+**License:** GPL-3.0-or-later
 
 ## Overview
 
@@ -228,12 +227,3 @@ These tools exist because:
 - Interactive menus reduce errors
 - Learning happens through doing, not reading man pages
 
-## License
-
-```
-SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-Nordix license - https://polyformproject.org/licenses/noncommercial/1.0.0
-Copyright (c) 2025 Jimmy Källhagen
-Part of Nordix - https://github.com/jimmykallhagen/Nordix
-Nordix and Yggdrasil are trademarks of Jimmy Källhagen
-```
